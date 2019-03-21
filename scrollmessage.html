@@ -1,0 +1,120 @@
+<script type="text/javascript">
+    RED.nodes.registerType('scrollMessage',{
+        category: 'Raspberry Pi',
+        color: '#C0DEED',
+        defaults: {
+            colorHex: {value:"#ffffff"},
+            backHex: {value:"#000000"},
+			shiftAmount: {value: 1,required: true},
+			delay: {value: 200,required: true},
+			rotation: {value: 0, required: false},
+			flip: {value: 0, required: false},
+			randomColor: {value:false, required: false}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "light.png",
+		paletteLabel: "scroll message",
+        label: "scroll message",
+		oneditprepare: function(){
+			function mirror(selectorSource, selectorTarget){
+				
+				if($(selectorTarget).val()){
+					$(selectorSource).val($(selectorTarget).val());
+				}
+				$(selectorSource).change(function(){
+					$(selectorTarget).val($(this).val());
+				});
+			}
+			
+			mirror("#colorTex","#node-input-colorHex");
+			mirror("#backTex","#node-input-backHex");
+
+			$("#colorTex")[0].disabled = $("#node-input-randomColor").is(':checked');
+
+			$("#node-input-randomColor").change(function(){
+				$("#colorTex")[0].disabled = $("#node-input-randomColor").is(':checked');
+			});
+			
+		}
+    });
+</script>
+
+<script type="text/x-red" data-template-name="scrollMessage">
+    <div class="form-row">
+        <label for="colorTex"><i class="fa fa-paint-brush"></i> Color</label>
+		<input type="color" id="colorTex" placeholder="Color" style="width: 15%;">
+		<input type="checkbox" id="node-input-randomColor" style="display: inline-block; width: auto; vertical-align: top;"> (Random Colors)
+        <input type="text" id="node-input-colorHex" style="display:none;">
+    </div>
+
+    <div class="form-row">
+        <label for="backTex"><i class="fa fa-paint-brush"></i> Background</label>
+		<input type="color" id="backTex" placeholder="Color" style="width: 15%;">
+        <input type="text" id="node-input-backHex" style="display:none;">
+    </div>
+	
+	<div class="form-row">
+		<label for="node-input-shiftAmount"><i class="fa fa-arrows-h"></i> Shift Amount</label>
+		<select id="node-input-shiftAmount">
+			<option value="1">1</option>
+			<option value="2">2</option>
+			<option value="4">4</option>
+			<option value="8">8</option>
+		</select>
+	</div>
+	
+	<div class="form-row">
+		<label for="node-input-delay"><i class="fa fa-clock-o"></i> Delay</label>
+		<input type="text" id="node-input-delay" style="width:20%;"> (Miliseconds)
+	</div>
+	
+	<div class="form-row">
+		<label for="node-input-rotation"><i class="fa fa-undo"></i> Rotation</label>
+		<select id="node-input-rotation">
+			<option value="0">0</option>
+			<option value="90">90</option>
+			<option value="180">180</option>
+			<option value="270">270</option>
+		</select>
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-flip"><i class="fa fa-undo"></i> Flip</label>
+		<select id="node-input-flip">
+			<option value="0">no</option>
+			<option value="1">horizontally</option>
+			<option value="2">vertically</option>
+		</select>
+	</div>
+	
+</script>
+
+<script type="text/x-red" data-help-name="scrollMessage">
+    <p>An intermediate node that converts the message payload into a scrollable message to the sense-hat-simulator</p>
+	
+	<h3>Input</h3>
+    <dl class="message-properties">
+        <dt>payload
+            <span class="property-type">string</span>
+        </dt>
+        <dd> the text to be scrolled.</dd>
+    </dl>
+	
+	<h3>Output</h3>
+	<ol class="node-ports">
+		<dl class="message-properties">
+			<dt>payload <span class="property-type">string</span></dt>
+			<dd>the command representing one of the scrolling stages.</dd>
+		</dl>
+	</ol>
+	
+	<h3>Details</h3>
+	<p>The text in <code>msg.payload</code> currently supports the following characteres:</p>
+	<p style="word-wrap: break-word;">
+		<b>!&quot;#$%&amp;'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~</b>
+	</p>
+	
+	<h3>References</h3>
+	<a href="https://github.com/carloszimm/node-red-contrib-sense-hat-scroll-message" target="_blank">GitHub</a> - the nodes github repository
+</script>
