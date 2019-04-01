@@ -1,5 +1,5 @@
-var ab = require('asyncblock');
-var randomHexColor = require('random-hex-color');
+const queue = require('async/queue');
+const randomHexColor = require('random-hex-color');
 
 const CHAR_MATRICES = require('./characters.js').CHAR_MATRICES;
 
@@ -84,6 +84,34 @@ function screenUpdate(displayBuffer, node){
 	node.send(msg);
 }
 
+function scrollMessage(message, node, nextMessage){
+
+	let index, temp;
+	let displayBuffer = [0b0,0b0,0b0,0b0,0b0,0b0,0b0,0b0];
+
+	let q = queue(function(task, callback) {
+		screenUpdate(task.buffer, task.node);
+		setTimeout(callback, task.node.delay);
+	});
+
+	q.drain = function(){
+		nextMessage();
+	};
+
+	for(let k = 0; k < message.length; k++){ //loops through the characters
+		for(let scroll = 0; scroll < (8/node.shiftAmount); scroll++){ //shifts display
+			for(let line = 0; line < 8; line++){ //loops through the lines
+				index = message.charCodeAt(k); //gets the ASCII integer code
+				temp = CHAR_MATRICES[index-32][line];
+				displayBuffer[line] = (displayBuffer[line] << node.shiftAmount)
+												| (temp >> ((8 - node.shiftAmount) - scroll * node.shiftAmount));
+			}
+			
+			q.push({buffer: displayBuffer.slice(0), node});
+		}
+	}
+}
+
 module.exports = function(RED) {
 	
     function scrollMessageNode(config) {
@@ -96,42 +124,18 @@ module.exports = function(RED) {
 		this.rotation = config.rotation || 0;
 		this.flip = config.flip || 0;
 		this.randomColor = config.randomColor || false;
-		this.nodeClosed = false;
 		
-        var node = this;
+        let node = this;
 		
-        node.on('input', function(msg) {
-            var message = msg.payload + " ";
-			
-			var index, temp;
-			var displayBuffer = [0b0,0b0,0b0,0b0,0b0,0b0,0b0,0b0];
-			
-			ab(function(flow){
-				for(let k = 0; k < message.length; k++){ //loops through the characters
-					for(let scroll = 0; scroll < (8/node.shiftAmount); scroll++){ //shifts display
-						for(let line = 0; line < 8; line++){ //loops through the lines
-							index = message.charCodeAt(k); //gets the ASCII integer code
-							temp = CHAR_MATRICES[index-32][line];
-							displayBuffer[line] = (displayBuffer[line] << node.shiftAmount)
-															| (temp >> ((8 - node.shiftAmount) - scroll * node.shiftAmount));
-						}
-						
-						screenUpdate(displayBuffer, node);
-						 
-						setTimeout(flow.add(), node.delay);
-						flow.wait(); //waits for the setTimeout
-						
-						if(node.nodeClosed){
-							return;
-						}
-					}
-				}
-			});
-        });
-
-        this.on('close', function() {
-    		node.nodeClosed = true;
+		let q = queue(function(task, callback) {
+			scrollMessage(task, node, callback);
 		});
+
+		node.on('input', function(msg){
+			q.push(msg.payload + ' ');
+		});
+
+        node.on('close', q.kill);
     }
-    RED.nodes.registerType("scrollMessage",scrollMessageNode);
+    RED.nodes.registerType("scrollMessage", scrollMessageNode);
 }

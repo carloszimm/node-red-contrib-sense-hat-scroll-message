@@ -4,7 +4,7 @@
   "description": "A Node-RED node to scroll messages across the node-red-node-pi-sense-hat-simulator LED display",
   "author": "Carlos Zimmerle <carloszimmerle@gmail.com> (github.com/carloszimm)",
   "dependencies": {
-    "asyncblock": "^2.2.12",
+    "async": "^2.6.2",
     "random-hex-color": "^1.0.1"
   },
   "keywords": [
