@@ -3,9 +3,18 @@
   "version": "2.0.0",
   "description": "A Node-RED node to scroll messages across the node-red-node-pi-sense-hat-simulator LED display",
   "author": "Carlos Zimmerle <carloszimmerle@gmail.com> (github.com/carloszimm)",
+  "scripts": {
+    "build": "babel src -d lib",
+    "prepare": "npm run build"
+  },
   "dependencies": {
     "async": "^2.6.2",
     "random-hex-color": "^1.0.1"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.4.0",
+    "@babel/preset-env": "^7.4.2"
   },
   "keywords": [
     "node-red",
@@ -18,7 +27,7 @@
   ],
   "node-red": {
     "nodes": {
-      "scrollMessage": "scrollmessage.js"
+      "scrollMessage": "lib/scrollmessage.js"
     }
   },
   "license": "MIT",

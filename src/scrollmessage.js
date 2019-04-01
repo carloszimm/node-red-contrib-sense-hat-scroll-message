@@ -1,7 +1,7 @@
 const queue = require('async/queue');
 const randomHexColor = require('random-hex-color');
 
-const CHAR_MATRICES = require('./characters.js').CHAR_MATRICES;
+const CHAR_MATRICES = require('./characters').CHAR_MATRICES;
 
 function screenUpdate(displayBuffer, node){
 	var aux1, aux2, randomColor = randomHexColor();
